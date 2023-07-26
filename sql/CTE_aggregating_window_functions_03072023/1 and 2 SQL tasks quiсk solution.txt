@@ -1,0 +1,74 @@
+/* 
+
+This type of solutions suits for one-time sample extracting solutions, situations when we probably want to make 
+additional calculations and create some similar queries.
+Cases when we deal with rather small amounts of data or servers with high performance, 
+databases in which each operation doesn't costs real money.
+
+The main advantages of this type are simplicity to code and sustainability to mechanic mistakes.
+
+*/
+
+--- Task 1. Average_salary_under_manager
+
+
+with avg_sal as (
+select avg(t1.salary) as average_salary_under_manager, manager_id
+from task1_staff t1
+where manager_id is not null
+group by manager_id)
+
+, managers as (select distinct emp_id, emp_name as manager from task1_staff 
+             where emp_id in (select distinct manager_id from task1_staff where manager_id is not null))
+
+select manager_id, manager, average_salary_under_manager
+from avg_sal a 
+left join managers m on a.manager_id=m.emp_id
+order by 3 desc
+
+
+
+--- Task 2. List of users
+
+
+with merged as (
+SELECT t.* , u.*
+FROM task2_training_details t
+left join task2_users u on t.user_id = u.id)
+
+, daily_trainings  as (
+	select training_date, user_id, count(training_id) as trainigs_daily
+	from merged
+	group by training_date, user_id
+	having count(training_id)>1)
+
+
+, tot_trainings as (
+  	select user_id, count(training_id) as trainings_amount
+    from merged
+	group by user_id
+	having count(training_id)>2)
+   
+, users as (
+  	select distinct t.user_id
+    from tot_trainings t
+  	inner join daily_trainings d on d.user_id = t.user_id)
+    
+, max_trainings_daily as (
+  	select distinct user_id, max(trainigs_daily) over(partition by user_id) as max_training_count_per_day
+	from daily_trainings)
+
+select distinct m.user_id, m.name as user_name, t.trainings_amount as total_training_count, d.max_training_count_per_day
+from merged m
+inner join max_trainings_daily d on m.user_id = d.user_id
+inner join users u on m.user_id = u.user_id
+inner join tot_trainings t on m.user_id = t.user_id
+order by d.max_training_count_per_day desc, t.trainings_amount desc
+
+
+/*
+
+service:
+https://extendsclass.com/mysql-online.html
+
+*/

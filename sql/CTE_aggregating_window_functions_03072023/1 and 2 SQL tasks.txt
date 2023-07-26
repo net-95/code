@@ -1,0 +1,24 @@
+---2 SQL tasks:
+
+---1. Calculate average salary under manager
+
+Answer format (list of expected columns): 
+1) manager_id
+2) manager
+3) average_salary_under_manager
+
+
+---2. List of users.
+Please write a query which returns a list of users who visited more than one training 
+per one day and total trainning counts > 2. Sort users by max trainning counts per one
+day and total trainning counts.
+
+Answer format (list of expected columns): 
+1) user_id 
+2) user_name
+3) total_traning_count
+4) max_traning_count_per_day
+
+
+
+

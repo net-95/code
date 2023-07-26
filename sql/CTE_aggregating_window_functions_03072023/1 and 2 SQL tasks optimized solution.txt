@@ -1,0 +1,47 @@
+/* 
+
+This type of solutions suits for stored procedures, databases in which each operation costs real money.
+Cases when we deal with large amounts of data or weak servers.
+
+The main advantages of this type are queries performance and server capacity saving.
+
+*/
+
+--- Task 1. Average_salary_under_manager
+
+select t1.manager_id, t2.emp_name as manager, avg(t1.salary) as average_salary_under_manager 
+from task1_staff t1
+left join task1_staff t2 on t1.manager_id=t2.emp_id
+where t1.manager_id is not null
+group by t1.manager_id
+order by 3 desc
+
+--- Task 2. List of users
+
+with daily_trainings as (
+select training_date, user_id, count(training_id) as trainigs_daily
+	from task2_training_details
+	group by training_date, user_id
+	having count(training_id)>1)
+
+, tot_trainings as (
+  	select user_id, count(training_id) as trainings_amount
+    from task2_training_details
+	group by user_id
+	having count(training_id)>2)
+    
+, max_trainings_daily as (
+  	select distinct user_id, max(trainigs_daily) over(partition by user_id) as max_training_count_per_day
+	from daily_trainings)
+     
+select t.user_id, name, trainings_amount as total_traning_count, max_training_count_per_day	
+from tot_trainings t
+inner join max_trainings_daily m on t.user_id=m.user_id
+inner join task2_users u on t.user_id=u.id
+order by m.max_training_count_per_day desc, t.trainings_amount desc
+
+
+/*
+service:
+https://extendsclass.com/mysql-online.html
+*/
